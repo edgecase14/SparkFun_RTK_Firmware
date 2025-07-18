@@ -1084,6 +1084,13 @@ void beginSystemState()
             settings.lastState = systemState;
         }
 
+    //    if (online.lband == false)
+      //      systemState =
+        //        settings
+          //          .lastState; // Return to either Rover or Base Not Started. The last state previous to power down.
+      //  else
+            systemState = STATE_KEYS_STARTED; // Begin process for getting new keys
+
         // If the rocker switch was moved while off, force module settings
         // When switch is set to '1' = BASE, pin will be shorted to ground
         if (settings.lastState == STATE_ROVER_NOT_STARTED && digitalRead(pin_setupButton) == LOW)
@@ -1091,7 +1098,7 @@ void beginSystemState()
         else if (settings.lastState == STATE_BASE_NOT_STARTED && digitalRead(pin_setupButton) == HIGH)
             settings.updateZEDSettings = true;
 
-        systemState = STATE_ROVER_NOT_STARTED; // Assume Rover. ButtonCheckTask() will correct as needed.
+        //systemState = STATE_ROVER_NOT_STARTED; // Assume Rover. ButtonCheckTask() will correct as needed.
 
         setupBtn = new Button(pin_setupButton); // Create the button in memory
         // Allocation failure handled in ButtonCheckTask

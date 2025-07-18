@@ -41,7 +41,7 @@ void menuPointPerfectKeys()
         if (strlen(settings.pointPerfectDeviceProfileToken) > 0)
             systemPrintln(settings.pointPerfectDeviceProfileToken);
         else
-            systemPrintln("Use SparkFun Token");
+            systemPrintln("Use NRSI Token");
 
         systemPrint("2) Set Current Key: ");
         if (strlen(settings.pointPerfectCurrentKey) > 0)
@@ -263,6 +263,11 @@ bool pointperfectProvisionDevice()
             // Facet L-Band Direct v3.12 AABBCCDD1122
             snprintf(givenName, sizeof(givenName), "Facet LBand Direct %s - %s", versionString,
                      hardwareID); // Get ready for JSON
+        }
+        else if (productVariant == RTK_SURVEYOR)
+        {
+            // NRSI GPS AABBCCDD1122
+            snprintf(givenName, sizeof(givenName), "NRSI GPS %s", hardwareID); // Get ready for JSON
         }
 
         if (strlen(givenName) >= 50)
