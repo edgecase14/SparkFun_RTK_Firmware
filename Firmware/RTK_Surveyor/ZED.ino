@@ -7,7 +7,7 @@ bool zedEnableLBandCommunication()
 
     response &= theGNSS.setRXMCORcallbackPtr(&checkRXMCOR); // Enable callback to check if the PMP data is being decrypted successfully
 
-    if (productVariant == RTK_FACET_LBAND_DIRECT || productVariant == RTK_SURVEYOR)
+    if (productVariant == RTK_FACET_LBAND_DIRECT)
     {
         // Setup for ZED to NEO serial communication
         response &= theGNSS.setVal32(UBLOX_CFG_UART2INPROT_UBX, true); // Configure ZED for UBX input on UART2
@@ -18,17 +18,13 @@ bool zedEnableLBandCommunication()
         response &= i2cLBand.newCfgValset();
         response &= i2cLBand.addCfgValset(UBLOX_CFG_MSGOUT_UBX_RXM_PMP_I2C, 0); // Disable UBX-RXM-PMP on NEO's I2C port
 
-        //  temporary - for Ardusimple prototype receiver
-        response &= i2cLBand.addCfgValset(UBLOX_CFG_UART1OUTPROT_UBX, 1);         // Enable UBX output on NEO's UART1
-        response &= i2cLBand.addCfgValset(UBLOX_CFG_MSGOUT_UBX_RXM_PMP_UART1, 1); // Output UBX-RXM-PMP on NEO's UART1
-        response &= i2cLBand.addCfgValset(UBLOX_CFG_UART1_BAUDRATE, settings.radioPortBaud); // Match baudrate with ZED
-
         response &= i2cLBand.addCfgValset(UBLOX_CFG_UART2OUTPROT_UBX, 1);         // Enable UBX output on NEO's UART2
         response &= i2cLBand.addCfgValset(UBLOX_CFG_MSGOUT_UBX_RXM_PMP_UART2, 1); // Output UBX-RXM-PMP on NEO's UART2
         response &= i2cLBand.addCfgValset(UBLOX_CFG_UART2_BAUDRATE, settings.radioPortBaud); // Match baudrate with ZED
     }
-    else if (productVariant == RTK_FACET_LBAND)
+    else if (productVariant == RTK_FACET_LBAND || productVariant == RTK_SURVEYOR)
     {
+        response &= theGNSS.setVal8(UBLOX_CFG_SPARTN_USE_SOURCE, 1);
         // Older versions of the Facet L-Band had solder jumpers that could be closed to directly connect the NEO
         // to the ZED. If the user has explicitly disabled I2C corrections, enable a UART connection.
         if (settings.useI2cForLbandCorrections == true)
@@ -40,7 +36,9 @@ bool zedEnableLBandCommunication()
             response &= i2cLBand.newCfgValset();
             response &= i2cLBand.addCfgValset(UBLOX_CFG_MSGOUT_UBX_RXM_PMP_I2C, 1); // Enable UBX-RXM-PMP on NEO's I2C port
 
+            response &= i2cLBand.addCfgValset(UBLOX_CFG_UART1OUTPROT_UBX, 0);         // JJ ArduSimple
             response &= i2cLBand.addCfgValset(UBLOX_CFG_UART2OUTPROT_UBX, 0);         // Disable UBX output on NEO's UART2
+            response &= i2cLBand.addCfgValset(UBLOX_CFG_MSGOUT_UBX_RXM_PMP_UART1, 0); // JJ ArduSimple
             response &= i2cLBand.addCfgValset(UBLOX_CFG_MSGOUT_UBX_RXM_PMP_UART2, 0); // Disable UBX-RXM-PMP on NEO's UART2
         }
         else // Setup ZED to NEO serial communication
@@ -52,8 +50,12 @@ bool zedEnableLBandCommunication()
             response &= i2cLBand.newCfgValset();
             response &= i2cLBand.addCfgValset(UBLOX_CFG_MSGOUT_UBX_RXM_PMP_I2C, 0); // Disable UBX-RXM-PMP on NEO's I2C port
 
+            response &= i2cLBand.addCfgValset(UBLOX_CFG_UART1OUTPROT_UBX, 1);         // JJ ArduSimple
             response &= i2cLBand.addCfgValset(UBLOX_CFG_UART2OUTPROT_UBX, 1);         // Enable UBX output on UART2
+            response &= i2cLBand.addCfgValset(UBLOX_CFG_MSGOUT_UBX_RXM_PMP_UART1, 1); // JJ ArduSimple
             response &= i2cLBand.addCfgValset(UBLOX_CFG_MSGOUT_UBX_RXM_PMP_UART2, 1); // Output UBX-RXM-PMP on UART2
+            response &=
+                i2cLBand.addCfgValset(UBLOX_CFG_UART1_BAUDRATE, settings.radioPortBaud); // JJ ArduSimple
             response &=
                 i2cLBand.addCfgValset(UBLOX_CFG_UART2_BAUDRATE, settings.radioPortBaud); // Match baudrate with ZED
         }
@@ -80,14 +82,14 @@ bool zedDisableLBandCommunication()
     response &= i2cLBand.setRXMPMPmessageCallbackPtr(nullptr); // Disable PMP callback no matter the platform
     response &= theGNSS.setRXMCORcallbackPtr(nullptr); // Disable callback to check if the PMP data is being decrypted successfully
 
-    if (productVariant == RTK_FACET_LBAND_DIRECT || productVariant == RTK_SURVEYOR)
+    if (productVariant == RTK_FACET_LBAND_DIRECT)
     {
         response &= i2cLBand.newCfgValset();
-        response &= i2cLBand.addCfgValset(UBLOX_CFG_UART1OUTPROT_UBX, 0); // temp for JJ prototype receiver Ardusimple wired different
         response &= i2cLBand.addCfgValset(UBLOX_CFG_UART2OUTPROT_UBX, 0); // Disable UBX output from NEO's UART2
     }
-    else if (productVariant == RTK_FACET_LBAND)
+    else if (productVariant == RTK_FACET_LBAND || productVariant == RTK_SURVEYOR)
     {
+        response &= theGNSS.setVal8(UBLOX_CFG_SPARTN_USE_SOURCE, 0);
         // Older versions of the Facet L-Band had solder jumpers that could be closed to directly connect the NEO
         // to the ZED. Check if the user has explicitly set I2C corrections.
         if (settings.useI2cForLbandCorrections == true)
@@ -98,6 +100,7 @@ bool zedDisableLBandCommunication()
         else // Setup ZED to NEO serial communication
         {
             response &= i2cLBand.newCfgValset();
+            response &= i2cLBand.addCfgValset(UBLOX_CFG_UART1OUTPROT_UBX, 0); // temp for JJ prototype receiver Ardusimple wired different
             response &= i2cLBand.addCfgValset(UBLOX_CFG_UART2OUTPROT_UBX, 0); // Disable UBX output from NEO's UART2
         }
     }
